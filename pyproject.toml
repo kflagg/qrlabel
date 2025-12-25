@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "qrlabel"
+version = "0.1.0"
+description = "A python-based set of AWS Lambdas to generate QR codes and printable labels."
+authors = ["Kenny Flagg <flagg.ka@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "3.14.*"
+argparse = "1.4.0"
+aws-lambda-powertools = "3.23.0"
+pydantic = "2.12.5"
+pydantic-settings = "2.12.0"
+qrcode = "8.2"
+
+[tool.poetry.group.dev.dependencies]
+aws-cdk-lib = "2.232.1"
+constructs = "10.*"
+pytest = "8.4.*"
+black = "25.*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

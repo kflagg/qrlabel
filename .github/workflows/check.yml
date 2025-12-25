@@ -1,0 +1,31 @@
+name: check
+
+on:
+  pull_request:
+    branches: main
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.14"
+          cache: pip
+      - name: Set up poetry
+        uses: abatilo/actions-poetry@v2
+      - name: Create poetry environment
+        run: poetry install
+      - name: Set up node
+        uses: actions/setup-node@v3
+      - name: Install cdk
+        run: npm install -g aws-cdk
+      - name: Check black formatting
+        uses: psf/black@stable
+      - name: Run tests
+        run: poetry run pytest
+      - name: Synth cdk app
+        run: poetry run cdk synth

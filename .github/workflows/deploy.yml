@@ -1,0 +1,35 @@
+name: deploy
+
+on:
+  push:
+    branches: main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          aws-region: us-west-2
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.14"
+          cache: pip
+      - name: Set up poetry
+        uses: abatilo/actions-poetry@v2
+      - name: Create poetry environment
+        run: poetry install
+      - name: Set up node
+        uses: actions/setup-node@v3
+      - name: Install cdk
+        run: npm install -g aws-cdk
+      - name: Deploy cdk app
+        run: poetry run cdk deploy
