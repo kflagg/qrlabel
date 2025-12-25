@@ -51,18 +51,6 @@ parser.add_argument(
     default="",
     help="text to encode in QR code",
 )
-parser.add_argument(
-    "-u",
-    "--upper",
-    default="",
-    help="text to place above the QR code",
-)
-parser.add_argument(
-    "-l",
-    "--lower",
-    default="",
-    help="text to place belon the QR code",
-)
 ARGS = vars(parser.parse_args())
 
 
