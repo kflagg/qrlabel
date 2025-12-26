@@ -7,7 +7,6 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "3.14.*"
-argparse = "1.4.0"
 aws-lambda-powertools = "3.23.0"
 pydantic = "2.12.5"
 pydantic-settings = "2.12.0"
