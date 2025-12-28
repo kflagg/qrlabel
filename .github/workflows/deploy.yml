@@ -32,4 +32,4 @@ jobs:
       - name: Install cdk
         run: npm install -g aws-cdk
       - name: Deploy cdk app
-        run: poetry run cdk deploy
+        run: poetry run cdk deploy --require-approval never
