@@ -5,7 +5,6 @@ import pydantic_settings
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.utilities.parser import event_parser
-import qrcode
 import qrcode.constants
 import qrcode.image.svg
 import urllib.parse
@@ -79,4 +78,23 @@ def __run(event: LambdaEvent, context: LambdaContext) -> str:
         short_empty_elements=event.short_empty_elements,
     )
 
-    return svg
+    if event.label:
+        return {
+            "statusCode": 200,
+            "headers": {"Content-Type": "text/html"},
+            "body": f"""
+                <head><title>{urllib.parse.quote(event.text, safe='/')}</title></head>
+                <body>
+                    <div style='text-align: center;'>
+                        <p id='upper'>{urllib.parse.quote(event.upper, safe='/')}</p>
+                        {svg}
+                        <p id='lower'>{urllib.parse.quote(event.lower, safe='/')}</p>
+                    </div>
+                </body>""",
+        }
+
+    return {
+        "statusCode": 200,
+        "headers": {"Content-Type": "image/svg+xml"},
+        "body": svg,
+    }
