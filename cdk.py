@@ -35,15 +35,12 @@ class QrlabelStack(Stack):
             self,
             "QRLabel",
             description="QR Label API",
-            default_integration=aws_apigatewayv2_integrations.HttpLambdaIntegration(
-                "QRLabel",
-                handler=qrl_lambda,
-            ),
         ).add_routes(
             path="/",
             methods=[aws_apigatewayv2.HttpMethod.GET],
             integration=aws_apigatewayv2_integrations.HttpLambdaIntegration(
                 "QRL",
+                handler=qrl_lambda,
                 parameter_mapping=aws_apigatewayv2.ParameterMapping().overwrite_query_string(
                     name="label",
                     value=aws_apigatewayv2.MappingValue.custom("True"),
@@ -57,6 +54,7 @@ class QrlabelStack(Stack):
             methods=[aws_apigatewayv2.HttpMethod.GET],
             integration=aws_apigatewayv2_integrations.HttpLambdaIntegration(
                 "QRI",
+                handler=qrl_lambda,
                 parameter_mapping=aws_apigatewayv2.ParameterMapping().overwrite_query_string(
                     name="label",
                     value=aws_apigatewayv2.MappingValue.custom("False"),
