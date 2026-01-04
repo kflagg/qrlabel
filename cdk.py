@@ -31,35 +31,36 @@ class QrlabelStack(Stack):
         )
 
         # The QR label API.
-        qrlabel_api = aws_apigatewayv2.HttpApi(
+        qrl_api = aws_apigatewayv2.HttpApi(
             self,
             "QRLabel",
             description="QR Label API",
-            default_integration=aws_apigatewayv2_integrations.HttpLambdaIntegration(
-                "QRLabel",
-                handler=qrl_lambda,
-            ),
-        ).add_routes(
+        )
+
+        # Add the label resource.
+        qrlabel_api = qrl_api.add_routes(
             path="/",
             methods=[aws_apigatewayv2.HttpMethod.GET],
             integration=aws_apigatewayv2_integrations.HttpLambdaIntegration(
                 "QRL",
+                handler=qrl_lambda,
                 parameter_mapping=aws_apigatewayv2.ParameterMapping().overwrite_query_string(
                     name="label",
-                    value="True",
+                    value=aws_apigatewayv2.MappingValue.custom("True"),
                 ),
             ),
         )
 
         # Add the image resource.
-        qrimage_api = qrlabel_api.add_routes(
+        qrimage_api = qrl_api.add_routes(
             path="/image",
             methods=[aws_apigatewayv2.HttpMethod.GET],
             integration=aws_apigatewayv2_integrations.HttpLambdaIntegration(
                 "QRI",
+                handler=qrl_lambda,
                 parameter_mapping=aws_apigatewayv2.ParameterMapping().overwrite_query_string(
                     name="label",
-                    value="False",
+                    value=aws_apigatewayv2.MappingValue.custom("False"),
                 ),
             ),
         )
