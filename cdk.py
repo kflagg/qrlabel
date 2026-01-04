@@ -31,11 +31,14 @@ class QrlabelStack(Stack):
         )
 
         # The QR label API.
-        qrlabel_api = aws_apigatewayv2.HttpApi(
+        qrl_api = aws_apigatewayv2.HttpApi(
             self,
             "QRLabel",
             description="QR Label API",
-        ).add_routes(
+        )
+
+        # Add the label resource.
+        qrlabel_api = qrl_api.add_routes(
             path="/",
             methods=[aws_apigatewayv2.HttpMethod.GET],
             integration=aws_apigatewayv2_integrations.HttpLambdaIntegration(
@@ -49,7 +52,7 @@ class QrlabelStack(Stack):
         )
 
         # Add the image resource.
-        qrimage_api = qrlabel_api.add_routes(
+        qrimage_api = qrl_api.add_routes(
             path="/image",
             methods=[aws_apigatewayv2.HttpMethod.GET],
             integration=aws_apigatewayv2_integrations.HttpLambdaIntegration(
