@@ -46,7 +46,7 @@ class QrlabelStack(Stack):
                 "QRL",
                 parameter_mapping=aws_apigatewayv2.ParameterMapping().overwrite_query_string(
                     name="label",
-                    value="True",
+                    value=aws_apigatewayv2.MappingValue.custom("True"),
                 ),
             ),
         )
@@ -59,7 +59,7 @@ class QrlabelStack(Stack):
                 "QRI",
                 parameter_mapping=aws_apigatewayv2.ParameterMapping().overwrite_query_string(
                     name="label",
-                    value="False",
+                    value=aws_apigatewayv2.MappingValue.custom("False"),
                 ),
             ),
         )
