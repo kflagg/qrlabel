@@ -7,7 +7,7 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.utilities.parser import event_parser
 import qrcode.constants
 import qrcode.image.svg
-import urllib.parse
+import html
 
 # Set up logging output.
 log = Logger()
@@ -33,7 +33,7 @@ class qrLabelSettings(pydantic_settings.BaseSettings):
 settings = qrLabelSettings()
 
 
-class LambdaBody(pydantic.BaseModel):
+class QueryStringParams(pydantic.BaseModel):
     """Class defining the inputs to the API."""
 
     text: str  # Text to encode.
@@ -54,48 +54,58 @@ class LambdaBody(pydantic.BaseModel):
 
 
 class LambdaEvent(pydantic.BaseModel):
-    """Class defining the inputs to the lambda."""
+    """Class defining the event passed to the lambda."""
 
-    body: LambdaBody  # Body of the payload.
+    version: float
+    routeKey: str
+    rawPath: str
+    rawQueryString: str | None
+    headers: dict | None
+    queryStringParameters: QueryStringParams
+    requestContext: dict | None
+    isBase64Encoded: bool
 
 
 @event_parser(model=LambdaEvent)
 @log.inject_lambda_context
 def __run(event: LambdaEvent, context: LambdaContext) -> str:
     # Set logging level.
-    log.setLevel(event.log_level)
+    log.setLevel(event.queryStringParameters.log_level)
 
     # Generate QR code image.
     qr = qrcode.QRCode(
-        error_correction=event.error_correction,
-        box_size=event.box_size,
-        border=event.border,
+        error_correction=event.queryStringParameters.error_correction,
+        box_size=event.queryStringParameters.box_size,
+        border=event.queryStringParameters.border,
         image_factory=qrcode.image.svg.SvgPathImage,
     )
-    qr.add_data(event.text)
+    qr.add_data(event.queryStringParameters.text)
     qr.make(fit=True)
     svg = qr.make_image(
-        fill_color=event.fill_color, back_color=event.back_color
+        fill_color=event.queryStringParameters.fill_color,
+        back_color=event.queryStringParameters.back_color,
     ).to_string(
-        encoding=event.encoding,
-        method=event.method,
-        xml_declaration=event.xml_declaration,
-        default_namespace=event.default_namespace,
-        short_empty_elements=event.short_empty_elements,
+        encoding=event.queryStringParameters.encoding,
+        method=event.queryStringParameters.method,
+        xml_declaration=event.queryStringParameters.xml_declaration,
+        default_namespace=event.queryStringParameters.default_namespace,
+        short_empty_elements=event.queryStringParameters.short_empty_elements,
     )
 
-    if event.label:
+    if event.queryStringParameters.label:
+        upper = html.escape(event.queryStringParameters.upper).replace("\\n", "<br />")
+        lower = html.escape(event.queryStringParameters.lower).replace("\\n", "<br />")
         return {
             "statusCode": 200,
             "headers": {"Content-Type": "text/html"},
             "isBase64Encoded": False,
             "body": f"""
-                <head><title>{urllib.parse.quote(event.text, safe='/')}</title></head>
+                <head><title>{html.escape(event.queryStringParameters.text)}</title></head>
                 <body>
-                    <div style='text-align: center;'>
-                        <p id='upper'>{urllib.parse.quote(event.upper, safe='/')}</p>
+                    <div id='label' style='text-align: center; width: 2.5in;'>
+                        <p id='upper'>{upper}</p>
                         {svg}
-                        <p id='lower'>{urllib.parse.quote(event.lower, safe='/')}</p>
+                        <p id='lower'>{lower}</p>
                     </div>
                 </body>""",
         }
