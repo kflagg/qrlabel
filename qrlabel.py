@@ -93,12 +93,8 @@ def __run(event: LambdaEvent, context: LambdaContext) -> str:
     )
 
     if event.queryStringParameters.label:
-        log.debug(event.queryStringParameters.upper)
         upper = html.escape(event.queryStringParameters.upper).replace("\\n", "<br />")
-        log.debug(upper)
-        log.debug(event.queryStringParameters.lower)
         lower = html.escape(event.queryStringParameters.lower).replace("\\n", "<br />")
-        log.debug(lower)
         return {
             "statusCode": 200,
             "headers": {"Content-Type": "text/html"},
