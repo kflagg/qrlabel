@@ -33,8 +33,8 @@ class qrLabelSettings(pydantic_settings.BaseSettings):
 settings = qrLabelSettings()
 
 
-class LambdaEvent(pydantic.BaseModel):
-    """Class defining the inputs to the lambda."""
+class LambdaBody(pydantic.BaseModel):
+    """Class defining the inputs to the API."""
 
     text: str  # Text to encode.
     upper: str = ""  # Text above the image.
@@ -51,6 +51,12 @@ class LambdaEvent(pydantic.BaseModel):
     default_namespace: str | None = None  # Default namespace for the SVG.
     short_empty_elements: bool = True  # Use short empty elements in the SVG.
     log_level: int | str = settings.default_log_level  # Logging level.
+
+
+class LambdaEvent(pydantic.BaseModel):
+    """Class defining the inputs to the lambda."""
+
+    body: LambdaBody  # Body of the payload.
 
 
 @event_parser(model=LambdaEvent)
@@ -82,6 +88,7 @@ def __run(event: LambdaEvent, context: LambdaContext) -> str:
         return {
             "statusCode": 200,
             "headers": {"Content-Type": "text/html"},
+            "isBase64Encoded": False,
             "body": f"""
                 <head><title>{urllib.parse.quote(event.text, safe='/')}</title></head>
                 <body>
@@ -96,5 +103,6 @@ def __run(event: LambdaEvent, context: LambdaContext) -> str:
     return {
         "statusCode": 200,
         "headers": {"Content-Type": "image/svg+xml"},
+        "isBase64Encoded": False,
         "body": svg,
     }
