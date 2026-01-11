@@ -6,7 +6,8 @@ from aws_cdk import (
     Stack,
     Duration,
     aws_lambda,
-    aws_apigateway,
+    aws_apigatewayv2,
+    aws_apigatewayv2_integrations,
 )
 from constructs import Construct
 
@@ -30,48 +31,20 @@ class QrlabelStack(Stack):
         )
 
         # The QR label API.
-        qrlabel_api = aws_apigateway.LambdaRestApi(
+        qrl_api = aws_apigatewayv2.HttpApi(
             self,
             "QRLabel",
-            description="QR Image API",
-            handler=qrl_lambda,
-            proxy=False,
-            deploy=True,
+            description="QR Label API",
+            default_integration=aws_apigatewayv2_integrations.HttpLambdaIntegration(
+                "QRL",
+                handler=qrl_lambda,
+            ),
         )
 
-        # Root is the label resource.
-        qrlabel_api.root.add_method(
-            "GET",
-            request_parameters={
-                "method.request.querystring.text": True,
-                "method.request.querystring.upper": False,
-                "method.request.querystring.lower": False,
-                "method.request.querystring.error_correction": False,
-                "method.request.querystring.box_size": False,
-                "method.request.querystring.border": False,
-                "method.request.querystring.fill_color": False,
-                "method.request.querystring.back_color": False,
-                "method.request.querystring.encoding": False,
-                "method.request.querystring.method": False,
-                "method.request.querystring.xml_declaration": False,
-            },
-        )
-
-        # Add the image resource.
-        qrimage_api = qrlabel_api.root.add_resource("image")
-        qrimage_api.add_method(
-            "GET",
-            request_parameters={
-                "method.request.querystring.text": True,
-                "method.request.querystring.error_correction": False,
-                "method.request.querystring.box_size": False,
-                "method.request.querystring.border": False,
-                "method.request.querystring.fill_color": False,
-                "method.request.querystring.back_color": False,
-                "method.request.querystring.encoding": False,
-                "method.request.querystring.method": False,
-                "method.request.querystring.xml_declaration": False,
-            },
+        # Add the label resource.
+        qrlabel_api = qrl_api.add_routes(
+            path="/",
+            methods=[aws_apigatewayv2.HttpMethod.GET],
         )
 
 
